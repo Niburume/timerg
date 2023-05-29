@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "739229502650",
+    "firebase_url": "https://timerg-a31ec-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "timerg-a31ec",
+    "storage_bucket": "timerg-a31ec.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:739229502650:android:b049177e671ac3261b0683",
+        "android_client_info": {
+          "package_name": "com.example.timerg"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "739229502650-qdceejrdafi5e630cklpeh3i78ar5rq4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA9XGHReZ7QmYnS3rILkC9j4atVquJ5_QU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "739229502650-qdceejrdafi5e630cklpeh3i78ar5rq4.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "739229502650-3m8rn6397hav2m9s4sasuqhusel37rc1.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.timerg"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
