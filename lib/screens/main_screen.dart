@@ -1,12 +1,14 @@
 import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import 'package:timerg/helpers/db_helper.dart';
+import 'package:timerg/providers/data_provider.dart';
 
 import 'package:timerg/screens/projects_screen.dart';
 import 'package:timerg/screens/set_project_screen.dart';
-import 'package:timerg/widgets/timer.dart';
+import 'package:timerg/widgets/timer_widget.dart';
 
 class MainScreen extends StatefulWidget {
   static const routeName = 'main_screen';
@@ -22,6 +24,7 @@ class _MainScreenState extends State<MainScreen> {
   @override
   void initState() {
     // TimerBrain.instance.startLocationUpdates();
+
     super.initState();
   }
 
@@ -60,11 +63,9 @@ class _MainScreenState extends State<MainScreen> {
             ElevatedButton(
                 onPressed: () async {}, child: Text('Start background')),
             Expanded(child: Container()),
-            TimerWidget(
-              projectName: 'My home',
-            ),
+            TimerSmallWidget(),
             SizedBox(
-              height: 20,
+              height: 30,
             )
           ],
         ),

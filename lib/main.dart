@@ -2,6 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:timerg/providers/data_provider.dart';
+import 'package:timerg/screens/time_picker_screen.dart';
 import 'package:timerg/screens/login_screens/auth_screen.dart';
 import 'package:timerg/screens/projects_screen.dart';
 import 'firebase_options.dart';
@@ -42,7 +43,8 @@ class MyApp extends StatelessWidget {
         '/': (context) => const AuthScreen(),
         MainScreen.routeName: (context) => MainScreen(),
         SetProjectScreen.routeName: (context) => SetProjectScreen(),
-        ProjectScreen.routeName: (context) => ProjectScreen()
+        ProjectScreen.routeName: (context) => ProjectScreen(),
+        TimePickerScreen.routeName: (context) => TimePickerScreen()
         // PinPositionScreen.routeName: (context) => PinPositionScreen,
 
         // SearchScreen.routeName: (context) => SearchScreen(),

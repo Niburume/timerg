@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:timerg/Models/project_model.dart';
+import 'package:timerg/Models/time_entry_model.dart';
 import 'package:timerg/Models/user_model.dart';
 import 'package:timerg/providers/data_provider.dart';
 import 'package:uuid/uuid.dart';
@@ -18,6 +19,7 @@ class DBHelper {
 
   static const projectDB = 'project';
   static const userDB = 'users';
+  static const timeEntryDb = 'time_entry';
 
   String generateID() {
     const id = Uuid();
@@ -72,4 +74,15 @@ class DBHelper {
     return projects;
   }
   // endregion
+
+// region TIME ENTRIES
+  Future<String?> addTime(TimeEntry timeEntry) async {
+    String id = generateID();
+    timeEntry.id = id;
+    DatabaseReference ref = database.ref("$timeEntryDb/$id}");
+
+    await ref.set(timeEntry.toJson());
+    return id;
+  }
+// endregion
 }

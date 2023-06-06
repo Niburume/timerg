@@ -12,6 +12,7 @@ import 'package:timerg/Models/project_model.dart';
 import 'package:timerg/helpers/geo_brain.dart';
 import 'package:timerg/helpers/geolocator.dart';
 import 'package:timerg/providers/data_provider.dart';
+import 'package:timerg/widgets/confimation.dart';
 import 'package:timerg/widgets/confirmation_dialog_widget.dart';
 import 'package:geocoder2/geocoder2.dart';
 
@@ -327,34 +328,14 @@ class _SetProjectScreenState extends State<SetProjectScreen> {
   // region ADD PROJECT
   void addProject(PinPosition pinPosition) {
     showGeneralDialog(
-      context: context,
-      barrierLabel: "Confirm",
-      barrierDismissible: true,
-      barrierColor: Colors.black.withOpacity(0.5),
-      transitionDuration: Duration(milliseconds: 700),
-      pageBuilder: (_, __, ___) {
-        return ConfirmDialog(
-          position: pinPosition,
-          onTap: addProjectToDatabase,
-        );
-      },
-      transitionBuilder: (_, anim, __, child) {
-        Tween<Offset> tween;
-        if (anim.status == AnimationStatus.reverse) {
-          tween = Tween(begin: Offset(-1, 0), end: Offset.zero);
-        } else {
-          tween = Tween(begin: Offset(1, 0), end: Offset.zero);
-        }
-
-        return SlideTransition(
-          position: tween.animate(anim),
-          child: FadeTransition(
-            opacity: anim,
-            child: child,
-          ),
-        );
-      },
-    );
+        context: context,
+        pageBuilder: (_, __, ___) {
+          return ConfirmationDialog(dataList: [
+            {'latitude': pinPosition.latitude.toString()},
+            {'longitude': pinPosition.latitude.toString()},
+            {'Name': pinPosition.projectName}
+          ], onOkTap: addProjectToDatabase, okTitle: 'Add project');
+        });
   }
 
   Future<void> addProjectToDatabase() async {

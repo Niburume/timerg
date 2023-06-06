@@ -10,3 +10,6 @@ const String tPassword = 'Password';
 const Duration tRequestFrequency = Duration(seconds: 10);
 
 const kGoogleApiKey = 'AIzaSyCm5MyVuUO4qUug_3O8HpXziqdKu-X1kBc';
+
+// TIMER
+const int kMaxHours = 14;

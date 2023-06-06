@@ -6,10 +6,29 @@ import '../Models/pin_position_model.dart';
 import 'package:cool_alert/cool_alert.dart';
 
 class ConfirmDialog extends StatefulWidget {
-  final PinPosition position;
+  final List<Map<String, String>> dataList = [{}];
+  final String line1;
+  final String value1;
+  final String? line2;
+  final String? value2;
+  final String? line3;
+  final String? value3;
+  final String? line4;
+  final String? value4;
   final Function? onTap;
+  final String confirmLabel;
 
-  ConfirmDialog({required this.position, this.onTap});
+  ConfirmDialog(
+      {this.onTap,
+      required this.line1,
+      required this.value1,
+      this.line2,
+      this.value2,
+      this.line3,
+      this.value3,
+      this.line4,
+      this.value4,
+      required this.confirmLabel});
 
   @override
   State<ConfirmDialog> createState() => _ConfirmDialogState();
@@ -27,21 +46,24 @@ class _ConfirmDialogState extends State<ConfirmDialog> {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Text(widget.position.latitude.toString()),
+            lineCard(widget.line1, widget.value1),
+            widget.line2 != null
+                ? lineCard(widget.line2!, widget.value2!)
+                : Container(),
             const SizedBox(
               height: 10,
             ),
-            Text(widget.position.longitude.toString()),
+            widget.line3 != null
+                ? lineCard(widget.line3!, widget.value3!)
+                : Container(),
             const SizedBox(
               height: 10,
             ),
-            Text('The address: ${widget.position.address}'),
+            widget.line4 != null
+                ? lineCard(widget.line4!, widget.value4!)
+                : Container(),
             const SizedBox(
               height: 10,
-            ),
-            Text('The radius is: ${widget.position.radius.toString()} meters'),
-            SizedBox(
-              height: 30,
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -58,23 +80,30 @@ class _ConfirmDialogState extends State<ConfirmDialog> {
                       onTap: () {
                         widget.onTap!();
                       },
-                      title: 'Save'),
+                      title: widget.confirmLabel),
                 ),
-                // ElevatedButton(
-                //     onPressed: () {
-                //       Navigator.pop(context);
-                //     },
-                //     child: const Text('Cancel')),
-                // ElevatedButton(
-                //     onPressed: () {
-                //       widget.onTap!();
-                //       //Navigator.pop(context);
-                //     },
-                //     child: const Text(' Save ')),
               ],
             )
           ],
         ),
+      ),
+    );
+  }
+
+  Widget lineCard(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [Text(label), SingleChildScrollView(child: Text(value))],
+          ),
+          SizedBox(
+            height: 10,
+          ),
+          Divider()
+        ],
       ),
     );
   }
