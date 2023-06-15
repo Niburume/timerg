@@ -7,6 +7,7 @@ class Project {
   final double radius;
   bool archived;
   List<String> users;
+  final String note;
 
   Project(
       {this.id,
@@ -16,6 +17,7 @@ class Project {
       required this.address,
       required this.radius,
       required this.users,
+      this.note = '',
       this.archived = false});
 
   factory Project.fromJson(Map<String, dynamic> json) {
@@ -28,6 +30,7 @@ class Project {
       projectName: json['projectName'] as String,
       address: json['address'] as String,
       radius: json['radius'].toDouble() as double,
+      note: json['note'] as String,
       users: users as List<String>,
     );
   }
@@ -41,6 +44,7 @@ class Project {
       'address': address,
       'radius': radius,
       'users': users,
+      'note': note,
     };
   }
 }

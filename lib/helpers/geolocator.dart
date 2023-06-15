@@ -31,13 +31,13 @@ class GeoPosition {
     return position;
   }
 
-  Future<double> distanceBetween2Coord(LatLng point1, LatLng point2) async {
-    var _distanceInMeters = await Geolocator.distanceBetween(
-      point1.lat,
-      point1.lng,
-      point2.lat,
-      point2.lng,
-    );
-    return _distanceInMeters;
-  }
+  // Future<double> distanceBetween2Coord(LatLng point1, LatLng point2) async {
+  //   var _distanceInMeters = await Geolocator.distanceBetween(
+  //     point1.lat,
+  //     point1.lng,
+  //     point2.lat,
+  //     point2.lng,
+  //   );
+  //   return _distanceInMeters;
+  // }
 }

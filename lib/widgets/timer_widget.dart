@@ -1,36 +1,43 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
 import 'package:timerg/Models/time_entry_model.dart';
 import 'package:timerg/components/general_button.dart';
 import 'package:timerg/helpers/db_helper.dart';
+import 'package:timerg/helpers/geo_controller.dart';
+import 'package:timerg/providers/timer_provider.dart';
+import 'package:timerg/screens/choose_project_screen.dart';
 
 import 'package:timerg/screens/main_screen.dart';
 import 'package:timerg/screens/projects_screen.dart';
+import 'package:timerg/screens/set_project_screen.dart';
 import 'package:timerg/widgets/confimation.dart';
+import 'package:timerg/widgets/timePicker.dart';
 
+import '../Models/project_model.dart';
 import '../constants/constants.dart';
 import '../providers/data_provider.dart';
 import 'package:intl/intl.dart';
 
-import '../screens/time_picker_screen.dart';
-import 'datePicker.dart';
+enum Time { start, end }
 
-class TimerSmallWidget extends StatefulWidget {
-  const TimerSmallWidget({Key? key}) : super(key: key);
+class TimerW extends StatefulWidget with ChangeNotifier {
+  TimerW({Key? key}) : super(key: key);
 
   @override
-  State<TimerSmallWidget> createState() => _TimerSmallWidgetState();
+  State<TimerW> createState() => _TimerWState();
 }
 
-class _TimerSmallWidgetState extends State<TimerSmallWidget> {
+class _TimerWState extends State<TimerW> {
   String currentProjectName = 'Set a project';
   String currentUserId = '';
   Duration duration = Duration();
   Timer? timer;
   bool isRunning = false;
-  DateTime timeFrom = DateTime.now();
+  DateTime startTime = DateTime.now();
+  DateTime endTime = DateTime.now();
   bool isButtonVisible = false;
   DateTime currentDate = DateTime.now();
 
@@ -46,7 +53,35 @@ class _TimerSmallWidgetState extends State<TimerSmallWidget> {
         Provider.of<DataProvider>(context, listen: false).getCurrentUserId();
 
     super.initState();
-    // startTimer();
+    startTracking();
+  }
+
+  void startTracking() async {
+    List<Project>? projects;
+    const interval = tRequestFrequency;
+    projects = await Provider.of<DataProvider>(context, listen: false)
+        .queryAllProjects();
+
+    Timer.periodic(interval, (Timer timer) async {
+      if (projects!.isEmpty) {
+        print('empty');
+      } else {
+        // Get the current position
+        Project? foundProject = await GeoController.instance
+            .checkDistanceOfProjectsToPosition(projects);
+
+        if (foundProject != null && !isRunning) {
+          Provider.of<DataProvider>(context, listen: false)
+              .setCurrentProject(foundProject);
+          setState(() {});
+          startTimer();
+        } else if (foundProject == null && isRunning) {
+          // timer.cancel();
+          stopTimer();
+          // saveTimeEntry();
+        }
+      }
+    });
   }
 
   @override
@@ -59,7 +94,23 @@ class _TimerSmallWidgetState extends State<TimerSmallWidget> {
           .currentProject!
           .projectName;
     }
-    return buildTime();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(10),
+          child: Switch(
+            value: Provider.of<TimerProvider>(context, listen: true).autoMode,
+            onChanged: (_) {
+              Provider.of<TimerProvider>(context, listen: false)
+                  .switchAutoMode();
+              setState(() {});
+            },
+          ),
+        ),
+        buildTime(),
+      ],
+    );
   }
 
   Widget buildTime() {
@@ -76,7 +127,7 @@ class _TimerSmallWidgetState extends State<TimerSmallWidget> {
           children: [
             TextButton(
               onPressed: () {
-                Navigator.pushNamed(context, ProjectScreen.routeName);
+                Navigator.pushNamed(context, ChooseProjectScreen.routeName);
               },
               child: Text(
                 currentProjectName,
@@ -109,30 +160,43 @@ class _TimerSmallWidgetState extends State<TimerSmallWidget> {
             const SizedBox(
               height: 10,
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10.0),
-              child: Text(
-                dateString,
-                style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
-              ),
-            ),
             Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 const SizedBox(
                   width: 10,
                 ),
-                GestureDetector(
-                  onTap: () {
-                    chooseDateOrSetTime();
-                  },
-                  child: Text(
-                    timeFromDuration(duration),
-                    style: const TextStyle(
-                        fontSize: 40,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.blueGrey),
-                  ),
+                Column(
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        chooseDate();
+                      },
+                      child: Text(
+                        timeFromDuration(duration),
+                        style: const TextStyle(
+                            fontSize: 40,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.blueGrey),
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        chooseDate();
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                        child: FittedBox(
+                          fit: BoxFit.fitWidth,
+                          child: Text(
+                            '$dateString ${DateFormat.EEEE().format(currentDate)}',
+                            style: TextStyle(
+                                fontSize: 16, color: Colors.grey.shade600),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(
                   width: 8,
@@ -141,28 +205,100 @@ class _TimerSmallWidgetState extends State<TimerSmallWidget> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    GestureDetector(
-                      child: isRunning
-                          ? timerButton(
-                              icon: Icons.pause,
-                              color: Colors.orange,
-                            )
-                          : timerButton(
-                              icon: Icons.play_arrow,
-                              color: Colors.greenAccent),
-                      onTap: () {
-                        if (isRunning) {
-                          pauseTimer();
-                        } else {
-                          startTimer();
-                        }
-                      },
+                    Column(
+                      children: [
+                        GestureDetector(
+                          child: isRunning
+                              ? timerButton(
+                                  icon: Icons.pause,
+                                  color: Colors.orange,
+                                )
+                              : timerButton(
+                                  icon: Icons.play_arrow,
+                                  color: Colors.greenAccent),
+                          onTap: () {
+                            if (isRunning) {
+                              pauseTimer();
+                            } else {
+                              startTimer();
+                            }
+                          },
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                            chooseTime(Time.start, startTime);
+                          },
+                          child: Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 10.0),
+                            child: Column(
+                              children: [
+                                (!isRunning && duration == Duration.zero)
+                                    ? Text(
+                                        '-//-',
+                                        style: TextStyle(
+                                            fontSize: 13,
+                                            color: Colors.grey.shade600),
+                                      )
+                                    : Text(
+                                        '${startTime.hour}:${startTime.minute}',
+                                        style: TextStyle(
+                                            fontSize: 13,
+                                            color: Colors.grey.shade600),
+                                      ),
+                                Text(
+                                  'start',
+                                  style: TextStyle(
+                                      fontSize: 10,
+                                      color: Colors.grey.shade500),
+                                )
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                    GestureDetector(
-                      child: timerButton(icon: Icons.stop),
-                      onTap: () {
-                        stopTimer();
-                      },
+                    Column(
+                      children: [
+                        GestureDetector(
+                          child: timerButton(icon: Icons.stop),
+                          onTap: () {
+                            stopTimer();
+                          },
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                            chooseTime(Time.end, endTime);
+                          },
+                          child: Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 10.0),
+                            child: Column(
+                              children: [
+                                (!isRunning && duration != Duration.zero)
+                                    ? Text(
+                                        '${endTime.hour}:${endTime.minute}',
+                                        style: TextStyle(
+                                            fontSize: 13,
+                                            color: Colors.grey.shade600),
+                                      )
+                                    : Text(
+                                        '-//-',
+                                        style: TextStyle(
+                                            fontSize: 13,
+                                            color: Colors.grey.shade600),
+                                      ),
+                                Text(
+                                  'end',
+                                  style: TextStyle(
+                                      fontSize: 10,
+                                      color: Colors.grey.shade500),
+                                )
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                     const SizedBox(
                       width: 25,
@@ -261,28 +397,29 @@ class _TimerSmallWidgetState extends State<TimerSmallWidget> {
     final project =
         Provider.of<DataProvider>(context, listen: false).currentProject!;
 
-    final timeTo = DateTime.now();
-
     TimeEntry timeEntry = TimeEntry(
         userId: currentUserId,
         duration: timeFromDuration(duration),
         projectId: project.id!,
-        timeFrom: timeFrom,
-        timeTo: timeTo,
-        autoCheckIn: false);
+        timeFrom: startTime,
+        timeTo: endTime,
+        note: noteController.text,
+        autoAdding:
+            Provider.of<TimerProvider>(context, listen: false).autoMode);
 
     String? entryId = await DBHelper.instance.addTime(timeEntry);
     if (entryId != null) {
       duration = Duration();
     }
     isButtonVisible = false;
+
     Navigator.pop(context);
     Navigator.pushNamed(context, MainScreen.routeName);
   }
 
   void startTimer() {
     if (isRunning) return;
-    timeFrom = DateTime.now();
+    startTime = DateTime.now();
     timer = Timer.periodic(Duration(seconds: 1), (_) => addTime());
     isRunning = true;
     isButtonVisible = false;
@@ -293,13 +430,18 @@ class _TimerSmallWidgetState extends State<TimerSmallWidget> {
       timer?.cancel();
       isRunning = false;
       isButtonVisible = true;
+      endTime = DateTime.now();
     });
   }
 
   void stopTimer() {
+    endTime = DateTime.now();
     setState(() {
       if (duration != Duration()) isButtonVisible = true;
+      print(!isRunning);
+      print(duration);
       if (!isRunning && duration != Duration.zero) {
+        print('dialog');
         showGeneralDialog(
             context: context,
             pageBuilder: (_, __, ___) {
@@ -325,9 +467,6 @@ class _TimerSmallWidgetState extends State<TimerSmallWidget> {
   }
 
   void showConfirmationDialog() {
-    // if (currentProjectName == 'Set a project') {
-    //   Navigator.pushNamed(context, ProjectScreen.routeName);
-    // }
     showGeneralDialog(
         transitionDuration: const Duration(milliseconds: 400),
         context: context,
@@ -340,15 +479,49 @@ class _TimerSmallWidgetState extends State<TimerSmallWidget> {
         });
   }
 
-  void chooseDateOrSetTime() {
-    // TimeEntry timeEntry = TimeEntry(
-    //     userId: currentUserId,
-    //     duration: timeFromDuration(duration),
-    //     projectId: project.id!,
-    //     timeFrom: timeFrom,
-    //     timeTo: timeTo,
-    //     autoCheckIn: false);
-    Navigator.pushNamed(context, TimePickerScreen.routeName);
+  void chooseDate() {
+    showDatePicker(
+      context: context,
+      initialDate: currentDate,
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2100),
+      initialDatePickerMode: DatePickerMode.day,
+    )
+        .then((selectedDate) =>
+            {if (selectedDate != null) currentDate = selectedDate})
+        .then((value) => setState(() {}));
+  }
+
+  void chooseTime(Time timeToSet, DateTime? initialTime) {
+    if (isRunning) return;
+    initialTime ??= startTime;
+    print(initialTime);
+    showGeneralDialog(
+        barrierDismissible:
+            true, // Set to true to dismiss the dialog on tap outside
+        barrierLabel: 'Dismiss',
+        context: context,
+        pageBuilder: (_, __, ___) {
+          return TimePickerW(
+            onTimeSelected: (DateTime selectedTime) {
+              if (timeToSet == Time.start) {
+                startTime = selectedTime;
+              } else if (timeToSet == Time.end) {
+                endTime = selectedTime;
+              }
+              calculateTotalTime();
+              setState(() {});
+            },
+            initialTime: initialTime,
+          );
+        });
+  }
+
+  void calculateTotalTime() {
+    if (startTime == endTime || startTime.isAfter(endTime)) {
+      endTime = startTime.add(Duration(minutes: 5));
+      duration = endTime.difference(startTime);
+    }
   }
 
   String timeFromDuration(Duration duration) {

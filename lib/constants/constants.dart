@@ -7,7 +7,7 @@ const String tNickname = 'Nickname';
 const String tEmail = 'Email';
 const String tPassword = 'Password';
 
-const Duration tRequestFrequency = Duration(seconds: 10);
+const Duration tRequestFrequency = Duration(seconds: 5);
 
 const kGoogleApiKey = 'AIzaSyCm5MyVuUO4qUug_3O8HpXziqdKu-X1kBc';
 

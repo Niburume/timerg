@@ -57,8 +57,8 @@ class DBHelper {
   }
 
   Future<List<Project>> queryAllProjects() async {
-    DatabaseReference ref = database.ref("$projectDB");
     List<Project> projects = [];
+    DatabaseReference ref = database.ref("$projectDB");
     final snapshot = await ref.get();
     if (snapshot.exists && snapshot.value != null) {
       Map<String, dynamic> data = jsonDecode(jsonEncode(snapshot.value));

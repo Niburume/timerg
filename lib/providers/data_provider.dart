@@ -29,8 +29,11 @@ class DataProvider with ChangeNotifier {
 
   // endregion
   // region PROJECTS
-  Future<void> getAllProjects() async {
-    _projects = await DBHelper.instance.queryAllProjects();
+  Future<List<Project>> queryAllProjects() async {
+    var projects = await DBHelper.instance.queryAllProjects();
+    _projects = projects;
+    notifyListeners();
+    return projects;
   }
 
   void setCurrentProject(Project project) {

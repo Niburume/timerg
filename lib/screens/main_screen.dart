@@ -1,14 +1,14 @@
 import 'package:firebase_auth/firebase_auth.dart';
-
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 import 'package:timerg/helpers/db_helper.dart';
-import 'package:timerg/providers/data_provider.dart';
+import 'package:timerg/helpers/geo_controller.dart';
 
 import 'package:timerg/screens/projects_screen.dart';
 import 'package:timerg/screens/set_project_screen.dart';
 import 'package:timerg/widgets/timer_widget.dart';
+
+import '../widgets/status_widget.dart';
 
 class MainScreen extends StatefulWidget {
   static const routeName = 'main_screen';
@@ -23,10 +23,13 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   void initState() {
-    // TimerBrain.instance.startLocationUpdates();
+    // GeoController.instance.startLocationUpdates();
+    checkIfInZoneEvery15Min();
 
     super.initState();
   }
+
+  void checkIfInZoneEvery15Min() async {}
 
   @override
   Widget build(BuildContext context) {
@@ -62,9 +65,21 @@ class _MainScreenState extends State<MainScreen> {
                 child: Text('Projects')),
             ElevatedButton(
                 onPressed: () async {}, child: Text('Start background')),
+            ElevatedButton(
+                onPressed: () async {
+                  showGeneralDialog(
+                      barrierDismissible: true,
+                      barrierLabel: 'Dismiss',
+                      context: context,
+                      transitionDuration: Duration(milliseconds: 500),
+                      pageBuilder: (_, __, ___) {
+                        return const StatusW();
+                      });
+                },
+                child: Text('Show Succes')),
             Expanded(child: Container()),
-            TimerSmallWidget(),
-            SizedBox(
+            TimerW(),
+            const SizedBox(
               height: 30,
             )
           ],

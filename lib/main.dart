@@ -2,9 +2,11 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:timerg/providers/data_provider.dart';
-import 'package:timerg/screens/time_picker_screen.dart';
+import 'package:timerg/providers/timer_provider.dart';
+import 'package:timerg/screens/choose_project_screen.dart';
 import 'package:timerg/screens/login_screens/auth_screen.dart';
 import 'package:timerg/screens/projects_screen.dart';
+import 'package:timerg/widgets/timer_widget.dart';
 import 'firebase_options.dart';
 import 'package:timerg/screens/main_screen.dart';
 import 'package:timerg/screens/set_project_screen.dart';
@@ -18,7 +20,8 @@ void main() async {
   );
   runApp(MultiProvider(
     providers: [
-      ChangeNotifierProvider<DataProvider>(create: (_) => DataProvider())
+      ChangeNotifierProvider<DataProvider>(create: (_) => DataProvider()),
+      ChangeNotifierProvider<TimerProvider>(create: (_) => TimerProvider()),
     ],
     child: MyApp(),
   ));
@@ -44,7 +47,7 @@ class MyApp extends StatelessWidget {
         MainScreen.routeName: (context) => MainScreen(),
         SetProjectScreen.routeName: (context) => SetProjectScreen(),
         ProjectScreen.routeName: (context) => ProjectScreen(),
-        TimePickerScreen.routeName: (context) => TimePickerScreen()
+        ChooseProjectScreen.routeName: (context) => ChooseProjectScreen()
         // PinPositionScreen.routeName: (context) => PinPositionScreen,
 
         // SearchScreen.routeName: (context) => SearchScreen(),

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:timerg/components/list_tile.dart';
 import 'package:timerg/helpers/db_helper.dart';
 import 'package:timerg/providers/data_provider.dart';
+import 'package:timerg/screens/set_project_screen.dart';
 
 import '../Models/project_model.dart';
 
@@ -36,6 +37,21 @@ class _ProjectScreenState extends State<ProjectScreen> {
           title: Text(
             'Projects',
           ),
+          actions: [
+            Padding(
+              padding: const EdgeInsets.only(right: 10),
+              child: IconButton(
+                  onPressed: () {
+                    Navigator.pushNamed(context, SetProjectScreen.routeName)
+                        .then((value) => queryProjects());
+                    setState(() {});
+                  },
+                  icon: const Icon(
+                    Icons.add,
+                    size: 35,
+                  )),
+            )
+          ],
         ),
         body: ListView.builder(
             itemCount: _projects.length,

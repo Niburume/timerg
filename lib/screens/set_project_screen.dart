@@ -9,11 +9,10 @@ import 'package:google_api_headers/google_api_headers.dart';
 import 'package:provider/provider.dart';
 import 'package:timerg/Models/pin_position_model.dart';
 import 'package:timerg/Models/project_model.dart';
-import 'package:timerg/helpers/geo_brain.dart';
+import 'package:timerg/helpers/geo_controller.dart';
 import 'package:timerg/helpers/geolocator.dart';
 import 'package:timerg/providers/data_provider.dart';
 import 'package:timerg/widgets/confimation.dart';
-import 'package:timerg/widgets/confirmation_dialog_widget.dart';
 import 'package:geocoder2/geocoder2.dart';
 
 import '../constants/constants.dart';
@@ -46,6 +45,9 @@ CircleId currentCircleId = CircleId('currentCircleId');
 MarkerId currentMarkerId = MarkerId('currentMarkerId');
 Set<Marker> markersSet = {};
 double maxRadiusForCurrentMarker = 100;
+TextEditingController nameController = TextEditingController();
+TextEditingController noteController = TextEditingController();
+TextEditingController addressController = TextEditingController();
 
 class _SetProjectScreenState extends State<SetProjectScreen> {
   late GoogleMapController googleMapController;
@@ -190,7 +192,7 @@ class _SetProjectScreenState extends State<SetProjectScreen> {
   }
 
   void getExistingProjects() async {
-    await Provider.of<DataProvider>(context, listen: false).getAllProjects();
+    await Provider.of<DataProvider>(context, listen: false).queryAllProjects();
     allProjects = Provider.of<DataProvider>(context, listen: false).projects;
     if (allProjects.isEmpty) return;
     markersSet.clear();
@@ -327,14 +329,26 @@ class _SetProjectScreenState extends State<SetProjectScreen> {
 
   // region ADD PROJECT
   void addProject(PinPosition pinPosition) {
+    addressController.text = pinPosition.address;
     showGeneralDialog(
         context: context,
         pageBuilder: (_, __, ___) {
-          return ConfirmationDialog(dataList: [
-            {'latitude': pinPosition.latitude.toString()},
-            {'longitude': pinPosition.latitude.toString()},
-            {'Name': pinPosition.projectName}
-          ], onOkTap: addProjectToDatabase, okTitle: 'Add project');
+          return ConfirmationDialog(
+            dataList: [
+              {'latitude': pinPosition.latitude.toString()},
+              {'longitude': pinPosition.longitude.toString()},
+              {'radius': pinPosition.radius.toString()},
+            ],
+            onOkTap: addProjectToDatabase,
+            okTitle: 'Add project',
+            showTopTextField: true,
+            topTextFieldHint: 'Name the porject',
+            showAddressTextField: true,
+            topTextFieldController: nameController,
+            noteTextFieldController: noteController,
+            noteHint: 'Add port code, floor etc here...',
+            addressTextFieldController: addressController,
+          );
         });
   }
 
@@ -344,9 +358,10 @@ class _SetProjectScreenState extends State<SetProjectScreen> {
         .createProject(Project(
             latitude: pinPosition.latitude,
             longitude: pinPosition.longitude,
-            projectName: pinPosition.address,
+            projectName: nameController.text,
             address: pinPosition.address,
             radius: pinPosition.radius,
+            note: noteController.text.isEmpty ? '' : noteController.text,
             users: [userId!]))
         .then((value) => {
               CoolAlert.show(

@@ -7,7 +7,7 @@ class TimeEntry {
   String? tag;
   final DateTime? timeFrom;
   final DateTime? timeTo;
-  final bool autoCheckIn;
+  final bool autoAdding;
 
   TimeEntry(
       {this.id,
@@ -18,7 +18,7 @@ class TimeEntry {
       this.tag,
       this.timeFrom,
       this.timeTo,
-      required this.autoCheckIn});
+      required this.autoAdding});
 
   factory TimeEntry.fromJson(Map<String, dynamic> json) {
     return TimeEntry(
@@ -30,7 +30,7 @@ class TimeEntry {
         tag: json['tag'] as String?,
         timeFrom: DateTime.parse(json['timeFrom']) as DateTime?,
         timeTo: DateTime.parse(json['timeFrom']) as DateTime?,
-        autoCheckIn: json['autoCheckIn'] as bool);
+        autoAdding: json['autoCheckIn'] as bool);
   }
 
   Map<String, dynamic> toJson() {
@@ -43,7 +43,7 @@ class TimeEntry {
       'tag': tag,
       'timeFrom': timeFrom?.toIso8601String(),
       'timeTo': timeTo?.toIso8601String(),
-      'autoCheckIn': autoCheckIn
+      'autoCheckIn': autoAdding
     };
   }
 
